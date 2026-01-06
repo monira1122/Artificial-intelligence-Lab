@@ -3,38 +3,40 @@
 # ------------------------------------------------------
 
 def dfs(graph, start, goal):
-    stack = [(start, [start])]   # (current_node, path)
+    stack = [(start, [start], 0)]   # (current_node, path, total_cost)
     visited = set()
 
     while stack:
-        node, path = stack.pop()
+        node, path, cost = stack.pop()
 
         if node == goal:
-            return path
+            return path, cost
 
         if node not in visited:
             visited.add(node)
 
             # Push neighbours in REVERSE order so DFS visits left child first
-            for neighbour in reversed(graph[node]):
+            for neighbour, edge_cost in reversed(graph[node]):
                 if neighbour not in visited:
-                    stack.append((neighbour, path + [neighbour]))
+                    stack.append(
+                        (neighbour, path + [neighbour], cost + edge_cost)
+                    )
 
     return None
 
 
 # ------------------------------------------------------
-# Graph (E before D under A)
+# Graph WITH costs
 # ------------------------------------------------------
 
 graph = {
-    'S': ['A', 'B', 'C'],
-    'A': ['D', 'E'],   # E first → ensures path S-A-E-G
-    'B': ['G'],
-    'C': ['F'],
-    'D': ['H'],
-    'E': ['G'],
-    'F': ['G'],
+    'S': [('A',5), ('B',2), ('C',4)],
+    'A': [('D',9), ('E',4)],
+    'B': [('G',6)],
+    'C': [('F',2)],
+    'D': [('H',7)],
+    'E': [('G',6)],
+    'F': [('G',1)],
     'G': [],
     'H': []
 }
@@ -50,9 +52,11 @@ goal = input("Enter destination node: ").strip().upper()
 if start not in graph or goal not in graph:
     print("Invalid nodes! Please enter valid nodes from the graph.")
 else:
-    path = dfs(graph, start, goal)
+    result = dfs(graph, start, goal)
 
-    if path:
+    if result:
+        path, total_cost = result
         print("\nDFS Path:", " → ".join(path))
+        print("Total Cost:", total_cost)
     else:
         print("\nNo path found using DFS.")
